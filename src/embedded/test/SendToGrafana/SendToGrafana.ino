@@ -1,3 +1,4 @@
+#include <WebServer.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <Adafruit_SCD30.h>
@@ -16,11 +17,48 @@ const char* YOUR_GITHUB_USERNAME = "AlterMundi-MonitoreoyControl";
 const char* YOUR_REPO_NAME = "proyecto-monitoreo";
 const unsigned long UPDATE_INTERVAL = 300000; // Check updates every 5 minutes
 
+unsigned long lastUpdateCheck = 0;
+unsigned long lastSendTime = 0;
+
+WebServer server(80);
 Adafruit_SCD30 scd30;
 WiFiManager wifiManager; 
 WiFiClientSecure clientSecure;  
 WiFiClient client;
 HTTPClient http;
+
+void handleMediciones() {
+  float temperature = 0.0, humidity = 0.0, co2 = 0.0;
+
+  if (scd30.dataReady() && scd30.read()) {
+    temperature = scd30.temperature;
+    humidity = scd30.relative_humidity;
+    co2 = scd30.CO2;
+  }
+  if (!scd30.dataReady()) {
+    server.send(503, "application/json", "{\"error\": \"Datos no disponibles aún\"}");
+    return;
+  }  
+
+  String json = "{";
+  json += "\"temperatura\": " + String(temperature, 2) + ",";
+  json += "\"humedad\": " + String(humidity, 2) + ",";
+  json += "\"co2\": " + String(co2, 2);
+  json += "}";
+
+  server.send(200, "application/json", json);
+}
+
+void handleConfiguracion() {
+  String json = "{";
+  json += "\"device\": \"" + String(DEVICE_NAME) + "\",";
+  json += "\"firmware\": \"" + String(FIRMWARE) + "\",";
+  json += "\"db_url\": \"" + String(DB_URL) + "\",";
+  json += "\"ssid\": \"" + String(WiFi.SSID()) + "\"";
+  json += "}";
+
+  server.send(200, "application/json", json);
+}
 
 void setup() {
   Serial.begin(115200);
@@ -34,7 +72,14 @@ void setup() {
   }
 
   clientSecure.setInsecure(); 
-  }
+
+  server.on("/mediciones", HTTP_GET, handleMediciones);
+  server.on("/configuracion", HTTP_GET, handleConfiguracion);
+
+  server.begin();
+  Serial.println("Servidor web iniciado en el puerto 80");
+    
+}
 
 String getLatestReleaseTag(const char* repoOwner, const char* repoName) {
  
@@ -166,9 +211,11 @@ void send_data_grafana(float temperature, float humidity, float co2) {
 }
 
 void loop() {
+  server.handleClient();
 
-  // Check for updates periodically instead of every loop
-  unsigned long lastUpdateCheck = 0,currentMillis = millis();
+  unsigned long currentMillis = millis();
+
+  // 1. Verificamos si hay que chequear actualizaciones
   if (currentMillis - lastUpdateCheck >= UPDATE_INTERVAL) {
     Serial.printf("Free heap before checking: %d bytes\n", ESP.getFreeHeap());
     checkForUpdates();
@@ -176,22 +223,24 @@ void loop() {
     lastUpdateCheck = currentMillis;
   }
 
+  // 2. Enviamos datos a Grafana cada 10 segundos
+  if (currentMillis - lastSendTime >= 10000) {
+    lastSendTime = currentMillis;
 
-  float temperature = 99, humidity = 100, co2 = 999999;
+    float temperature = 99, humidity = 100, co2 = 999999;
 
-  if (scd30.dataReady()) {
-    if (!scd30.read()) {
-      Serial.println("Error leyendo el sensor!");
-      return;
+    if (scd30.dataReady()) {
+      if (!scd30.read()) {
+        Serial.println("Error leyendo el sensor!");
+        return;
+      }
+      temperature = scd30.temperature;
+      humidity = scd30.relative_humidity;
+      co2 = scd30.CO2;
     }
-    temperature = scd30.temperature;
-    humidity = scd30.relative_humidity;
-    co2 = scd30.CO2;
+
+    Serial.printf("Free heap before sending: %d bytes\n", ESP.getFreeHeap());
+    send_data_grafana(temperature, humidity, co2);
+    Serial.printf("Free heap after sending: %d bytes\n", ESP.getFreeHeap());
   }
-
-  Serial.printf("Free heap before sending: %d bytes\n", ESP.getFreeHeap());
-  send_data_grafana(temperature, humidity, co2);
-  Serial.printf("Free heap after sending: %d bytes\n", ESP.getFreeHeap());
-
-  delay(10000);
 }

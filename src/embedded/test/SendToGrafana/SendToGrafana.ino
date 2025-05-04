@@ -50,11 +50,14 @@ void handleMediciones() {
 }
 
 void handleConfiguracion() {
+  String mac = WiFi.macAddress(); 
+
+  mac.replace(":", ""); 
+  String hash = "moni-" + mac;
+
   String json = "{";
-  json += "\"device\": \"" + String(DEVICE_NAME) + "\",";
-  json += "\"firmware\": \"" + String(FIRMWARE) + "\",";
-  json += "\"db_url\": \"" + String(DB_URL) + "\",";
-  json += "\"ssid\": \"" + String(WiFi.SSID()) + "\"";
+  json += "\"hash\": \"" + hash + "\",";
+  json += "\"moni_name\": \"" + hash + "\"";
   json += "}";
 
   server.send(200, "application/json", json);

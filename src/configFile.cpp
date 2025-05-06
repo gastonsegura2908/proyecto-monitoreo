@@ -1,0 +1,60 @@
+#include <Arduino.h>
+#include <WebServer.h>
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include <Adafruit_SCD30.h>
+#include <time.h>
+#include <WiFiManager.h> 
+#include <HTTPUpdate.h>  
+#include <WiFiClientSecure.h>  
+#include <esp_ota_ops.h>
+#include "version.h"
+#include <SPIFFS.h>
+#include <ArduinoJson.h>
+#include "configFile.h"
+#include "globals.h"
+#include "constants.h"
+
+void createConfigFile() {
+    const char* path = "/config.json";
+  
+    if (SPIFFS.exists(path)) {
+      Serial.println("Archivo de configuración ya existe.");
+      return;
+    }
+  
+    Serial.println("Creando archivo de configuración...");
+  
+    File file = SPIFFS.open(path, FILE_WRITE);
+    if (!file) {
+      Serial.println("Error al abrir config.json para escritura.");
+      return;
+    }
+  
+    JsonDocument config;
+  
+    config["rotation_duration"] = 50000;
+    config["rotation_period"] = 3600000;
+    config["min_temperature"] = 37.5;
+    config["max_temperature"] = 37.7;
+    config["tray_one_date"] = 0;
+    config["tray_two_date"] = 0;
+    config["tray_three_date"] = 0;
+    config["incubation_period"] = 18;
+    config["max_hum"] = 65;
+    config["min_hum"] = 55;
+  
+    // MAC sin dos puntos
+    String mac = WiFi.macAddress();
+    mac.replace(":", "");
+    config["hash"] = "incu-" + mac;
+    config["incubator_name"] = "incu-" + mac;
+  
+    if (serializeJson(config, file) == 0) {
+      Serial.println("Error al escribir JSON en archivo.");
+    } else {
+      Serial.println("Archivo config.json creado correctamente.");
+    }
+  
+    file.close();
+  }

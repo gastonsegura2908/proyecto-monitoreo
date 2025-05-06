@@ -39,12 +39,12 @@ jobs:
     - name: Build Firmware
       run: |
         mkdir -p binarios
-        arduino-cli compile --fqbn esp32:esp32:esp32 --output-dir binarios src/embedded/test/SendToGrafana/SendToGrafana.ino
+        arduino-cli compile --fqbn esp32:esp32:esp32 --output-dir binarios src/main.cpp
 
     - name: Get Version
       id: get_version  
       run: |
-        VERSION=$(sed -n 's/#define FIRMWARE_VERSION "\([^"]*\)"/\1/p' src/embedded/test/SendToGrafana/version.h)
+        VERSION=$(sed -n 's/#define FIRMWARE_VERSION "\([^"]*\)"/\1/p' include/version.h)
         echo "version=$VERSION" >> $GITHUB_ENV
    
     - name: Create Release

@@ -9,6 +9,8 @@
 #include <WiFiClientSecure.h>  
 #include <esp_ota_ops.h>
 #include "version.h"
+#include <SPIFFS.h>
+#include <ArduinoJson.h>
 
 const char* url = "http://grafana.altermundi.net:8086/write?db=cto";
 const char* token_grafana = "token:e98697797a6a592e6c886277041e6b95";
@@ -27,6 +29,50 @@ WiFiManager wifiManager;
 WiFiClientSecure clientSecure;  
 WiFiClient client;
 HTTPClient http;
+
+void crearArchivoConfig() {
+  const char* path = "/config.json";
+
+  if (SPIFFS.exists(path)) {
+    Serial.println("Archivo de configuración ya existe.");
+    return;
+  }
+
+  Serial.println("Creando archivo de configuración...");
+
+  File file = SPIFFS.open(path, FILE_WRITE);
+  if (!file) {
+    Serial.println("Error al abrir config.json para escritura.");
+    return;
+  }
+
+  StaticJsonDocument<512> config;
+
+  config["rotation_duration"] = 50000;
+  config["rotation_period"] = 3600000;
+  config["min_temperature"] = 37.5;
+  config["max_temperature"] = 37.7;
+  config["tray_one_date"] = 0;
+  config["tray_two_date"] = 0;
+  config["tray_three_date"] = 0;
+  config["incubation_period"] = 18;
+  config["max_hum"] = 65;
+  config["min_hum"] = 55;
+
+  // MAC sin dos puntos
+  String mac = WiFi.macAddress();
+  mac.replace(":", "");
+  config["hash"] = "incu-" + mac;
+  config["incubator_name"] = "incu-" + mac;
+
+  if (serializeJson(config, file) == 0) {
+    Serial.println("Error al escribir JSON en archivo.");
+  } else {
+    Serial.println("Archivo config.json creado correctamente.");
+  }
+
+  file.close();
+}
 
 void handleMediciones() {
   float temperature = 0.0, humidity = 0.0, co2 = 0.0;
@@ -51,38 +97,16 @@ void handleMediciones() {
 }
 
 void handleConfiguracion() {
-  String mac = WiFi.macAddress(); 
-
-  mac.replace(":", ""); 
-  String hash = "moni-" + mac;
-
-  String json = "{";
-  json += "\"hash\": \"" + hash + "\",";
-  json += "\"moni_name\": \"" + hash + "\"";
-  json += "}";
-
-  server.send(200, "application/json", json);
-}
-
-void setup() {
-  Serial.begin(115200);
-  wifiManager.autoConnect("ESP32-AP"); 
-
-  Serial.println("Conectado a WiFi");
-  configTime(0, 0, "pool.ntp.org", "time.nist.gov");
-
-  if (!scd30.begin()) {
-    Serial.println("No se pudo inicializar el sensor SCD30!");
+  File file = SPIFFS.open("/config.json", FILE_READ);
+  if (!file || file.isDirectory()) {
+    server.send(500, "application/json", "{\"error\": \"No se pudo abrir config.json\"}");
+    return;
   }
 
-  clientSecure.setInsecure(); 
+  String json = file.readString();  // Leer el contenido completo
+  file.close();
 
-  server.on("/mediciones", HTTP_GET, handleMediciones);
-  server.on("/configuracion", HTTP_GET, handleConfiguracion);
-
-  server.begin();
-  Serial.println("Servidor web iniciado en el puerto 80");
-    
+  server.send(200, "application/json", json);
 }
 
 String getLatestReleaseTag(const char* repoOwner, const char* repoName) {
@@ -213,6 +237,34 @@ void send_data_grafana(float temperature, float humidity, float co2) {
     Serial.println("Error en la conexión WiFi");
   }
 }
+
+void setup() {
+  Serial.begin(115200);
+  wifiManager.autoConnect("ESP32-AP"); 
+
+  Serial.println("Conectado a WiFi");
+  configTime(0, 0, "pool.ntp.org", "time.nist.gov");
+
+  if (!SPIFFS.begin(true)) {
+    Serial.println("Error montando SPIFFS");
+  }
+
+  crearArchivoConfig();
+
+  if (!scd30.begin()) {
+    Serial.println("No se pudo inicializar el sensor SCD30!");
+  }
+
+  clientSecure.setInsecure(); 
+
+  server.on("/mediciones", HTTP_GET, handleMediciones);
+  server.on("/configuracion", HTTP_GET, handleConfiguracion);
+
+  server.begin();
+  Serial.println("Servidor web iniciado en el puerto 80");
+    
+}
+
 
 void loop() {
   server.handleClient();

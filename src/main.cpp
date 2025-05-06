@@ -12,8 +12,8 @@
 #include <SPIFFS.h>
 #include <ArduinoJson.h>
 
-const char* url = "http://grafana.altermundi.net:8086/write?db=cto";
-const char* token_grafana = "token:e98697797a6a592e6c886277041e6b95";
+const char* URL = "http://grafana.altermundi.net:8086/write?db=cto";
+const char* TOKEN_GRAFANA = "token:e98697797a6a592e6c886277041e6b95";
 const char* FIRMWARE_BIN_URL = "http://192.168.0.106:8080/bins/SendToGrafana.ino.bin";
 const char* INICIALES = "ASC02";
 const char* YOUR_GITHUB_USERNAME = "AlterMundi-MonitoreoyControl";
@@ -30,7 +30,7 @@ WiFiClientSecure clientSecure;
 WiFiClient client;
 HTTPClient http;
 
-void crearArchivoConfig() {
+void createConfigFile() {
   const char* path = "/config.json";
 
   if (SPIFFS.exists(path)) {
@@ -46,7 +46,7 @@ void crearArchivoConfig() {
     return;
   }
 
-  StaticJsonDocument<512> config;
+  JsonDocument config;
 
   config["rotation_duration"] = 50000;
   config["rotation_period"] = 3600000;
@@ -142,6 +142,7 @@ String getLatestReleaseTag(const char* repoOwner, const char* repoName) {
   http.end();  
   return "";
 }
+
 void checkForUpdates() {
   String latestTag = getLatestReleaseTag(YOUR_GITHUB_USERNAME, YOUR_REPO_NAME);
   Serial.printf("Current version: %s, Available version: %s\n", FIRMWARE_VERSION, latestTag.c_str());
@@ -205,7 +206,7 @@ void checkForUpdates() {
   }
 }
 
-String create_grafana_message(float temperature, float humidity, float co2) {
+String createGrafanaMessage(float temperature, float humidity, float co2) {
   unsigned long long timestamp = time(nullptr) * 1000000000ULL;
   String message = "medicionesCO2,device=" + String(INICIALES) + 
                    " temp=" + String(temperature, 2) +
@@ -216,12 +217,12 @@ String create_grafana_message(float temperature, float humidity, float co2) {
   return message;
 }
 
-void send_data_grafana(float temperature, float humidity, float co2) {
+void sendDataGrafana(float temperature, float humidity, float co2) {
   if (WiFi.status() == WL_CONNECTED) {
-  http.begin(client, url);
+  http.begin(client, URL);
   http.addHeader("Content-Type", "text/plain");
-  http.addHeader("Authorization", "Basic " + String(token_grafana));
-  String data = create_grafana_message(temperature, humidity, co2);
+  http.addHeader("Authorization", "Basic " + String(TOKEN_GRAFANA));
+  String data = createGrafanaMessage(temperature, humidity, co2);
 
 
     int httpResponseCode = http.POST(data);
@@ -249,7 +250,7 @@ void setup() {
     Serial.println("Error montando SPIFFS");
   }
 
-  crearArchivoConfig();
+  createConfigFile();
 
   if (!scd30.begin()) {
     Serial.println("No se pudo inicializar el sensor SCD30!");
@@ -264,7 +265,6 @@ void setup() {
   Serial.println("Servidor web iniciado en el puerto 80");
     
 }
-
 
 void loop() {
   server.handleClient();
@@ -296,7 +296,7 @@ void loop() {
     }
 
     Serial.printf("Free heap before sending: %d bytes\n", ESP.getFreeHeap());
-    send_data_grafana(temperature, humidity, co2);
+    sendDataGrafana(temperature, humidity, co2);
     Serial.printf("Free heap after sending: %d bytes\n", ESP.getFreeHeap());
   }
 }

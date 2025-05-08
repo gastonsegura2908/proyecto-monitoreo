@@ -22,6 +22,8 @@ unsigned long lastUpdateCheck = 0;
 unsigned long lastSendTime = 0;
 bool sensorActivo = false;
 
+#ifndef UNIT_TEST
+
 void setup() {
   Serial.begin(115200);
   wifiManager.autoConnect("ESP32-AP"); 
@@ -100,3 +102,5 @@ void loop() {
     Serial.printf("Free heap after sending: %d bytes\n", ESP.getFreeHeap());
   }
 }
+
+#endif  // UNIT_TEST

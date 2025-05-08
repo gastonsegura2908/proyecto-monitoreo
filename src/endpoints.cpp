@@ -16,16 +16,22 @@
 
 void handleMediciones() {
     float temperature = 0.0, humidity = 0.0, co2 = 0.0;
-  
-    if (scd30.dataReady() && scd30.read()) {
-      temperature = scd30.temperature;
-      humidity = scd30.relative_humidity;
-      co2 = scd30.CO2;
-    }
-    if (!scd30.dataReady()) {
-      server.send(503, "application/json", "{\"error\": \"Datos no disponibles aún\"}");
-      return;
-    }  
+    #if defined(MODO_SIMULACION)
+      // Datos simulados
+      temperature = 22.5 + random(-100, 100) * 0.01;
+      humidity = 50 + random(-500, 500) * 0.01;
+      co2 = 400 + random(0, 200);
+    #else
+      if (scd30.dataReady() && scd30.read()) {
+        temperature = scd30.temperature;
+        humidity = scd30.relative_humidity;
+        co2 = scd30.CO2;
+      }
+      if (!scd30.dataReady()) {
+        server.send(503, "application/json", "{\"error\": \"Datos no disponibles aún\"}");
+        return;
+      }
+    #endif  
   
     String json = "{";
     json += "\"temperatura\": " + String(temperature, 2) + ",";

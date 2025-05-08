@@ -17,7 +17,9 @@
 
 void createConfigFile() {
     const char* path = "/config.json";
-  
+
+    SPIFFS.remove(path);// sacar
+
     if (SPIFFS.exists(path)) {
       Serial.println("Archivo de configuración ya existe.");
       return;
@@ -47,8 +49,8 @@ void createConfigFile() {
     // MAC sin dos puntos
     String mac = WiFi.macAddress();
     mac.replace(":", "");
-    config["hash"] = "incu-" + mac;
-    config["incubator_name"] = "incu-" + mac;
+    config["hash"] = "moni-" + mac;
+    config["moni_name"] = "moni-" + mac;
   
     if (serializeJson(config, file) == 0) {
       Serial.println("Error al escribir JSON en archivo.");

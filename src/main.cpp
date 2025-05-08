@@ -20,15 +20,14 @@
 
 unsigned long lastUpdateCheck = 0;
 unsigned long lastSendTime = 0;
+bool sensorActivo = false;
 
 void setup() {
   Serial.begin(115200);
   wifiManager.autoConnect("ESP32-AP"); 
   
-  //
-  Serial.print("Dirección IP asignada: ");
-  Serial.println(WiFi.localIP());  
-  //
+  Serial.print("Dirección IP asignada: "); // sacar
+  Serial.println(WiFi.localIP());  // sacar
 
   Serial.println("Conectado a WiFi");
   configTime(0, 0, "pool.ntp.org", "time.nist.gov");
@@ -39,7 +38,8 @@ void setup() {
 
   createConfigFile();
 
-  if (!scd30.begin()) {
+  sensorActivo = scd30.begin();
+  if (!sensorActivo) {
     Serial.println("No se pudo inicializar el sensor SCD30!");
   }
 
@@ -61,7 +61,9 @@ void loop() {
   // 1. Verificamos si hay que chequear actualizaciones
   if (currentMillis - lastUpdateCheck >= UPDATE_INTERVAL) {
     Serial.printf("Free heap before checking: %d bytes\n", ESP.getFreeHeap());
+    Serial.println("[checkForUpdates] Iniciando..."); //////////// sacar
     checkForUpdates();
+    Serial.println("[checkForUpdates] Finalizado."); //////////// sacar
     Serial.printf("Free heap after checking: %d bytes\n", ESP.getFreeHeap());
     lastUpdateCheck = currentMillis;
   }
@@ -72,18 +74,31 @@ void loop() {
 
     float temperature = 99, humidity = 100, co2 = 999999;
 
-    if (scd30.dataReady()) {
-      if (!scd30.read()) {
-        Serial.println("Error leyendo el sensor!");
+    #if defined(MODO_SIMULACION)
+      // Datos simulados
+      temperature = 22.5 + random(-100, 100) * 0.01;
+      humidity = 50 + random(-500, 500) * 0.01;
+      co2 = 400 + random(0, 200);
+      Serial.println("Enviando datos simulados...");
+    #else
+      if (sensorActivo && scd30.dataReady()) {
+        if (!scd30.read()) {
+          Serial.println("Error leyendo el sensor!");
+          return;
+        }
+        temperature = scd30.temperature;
+        humidity = scd30.relative_humidity;
+        co2 = scd30.CO2;
+      } else {
+        Serial.println("Sensor no listo, esperando...");
         return;
       }
-      temperature = scd30.temperature;
-      humidity = scd30.relative_humidity;
-      co2 = scd30.CO2;
-    }
+    #endif
 
     Serial.printf("Free heap before sending: %d bytes\n", ESP.getFreeHeap());
+    Serial.println("[sendDataGrafana] Iniciando..."); ///////// sacar
     sendDataGrafana(temperature, humidity, co2);
+    Serial.println("[sendDataGrafana] Finalizado."); ////////// sacar
     Serial.printf("Free heap after sending: %d bytes\n", ESP.getFreeHeap());
   }
 }

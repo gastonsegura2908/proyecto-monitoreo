@@ -26,24 +26,24 @@ String createGrafanaMessage(float temperature, float humidity, float co2) {
     return message;
   }
   
-  void sendDataGrafana(float temperature, float humidity, float co2) {
+void sendDataGrafana(float temperature, float humidity, float co2) {
     if (WiFi.status() == WL_CONNECTED) {
     http.begin(client, URL);
     http.addHeader("Content-Type", "text/plain");
     http.addHeader("Authorization", "Basic " + String(TOKEN_GRAFANA));
     String data = createGrafanaMessage(temperature, humidity, co2);
-  
-  
-      int httpResponseCode = http.POST(data);
-  
-      if (httpResponseCode == 204) {
+
+
+        int httpResponseCode = http.POST(data);
+
+        if (httpResponseCode == 204) {
         Serial.println("Datos enviados correctamente");
-      } else {
+        } else {
         Serial.printf("Error en el envío: %d\n", httpResponseCode);
-      }
-  
-      http.end();  
+        }
+
+        http.end();  
     } else {
-      Serial.println("Error en la conexión WiFi");
+        Serial.println("Error en la conexión WiFi");
     }
-  }
+}

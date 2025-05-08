@@ -15,7 +15,6 @@
 #include "constants.h"
 
 String getLatestReleaseTag(const char* repoOwner, const char* repoName) {
- 
     String apiUrl = "https://api.github.com/repos/" + String(repoOwner) + "/" + String(repoName) + "/releases/latest";
     Serial.println("API URL: " + apiUrl);
   
@@ -48,7 +47,7 @@ String getLatestReleaseTag(const char* repoOwner, const char* repoName) {
     return "";
   }
   
-  void checkForUpdates() {
+void checkForUpdates() {
     String latestTag = getLatestReleaseTag(YOUR_GITHUB_USERNAME, YOUR_REPO_NAME);
     Serial.printf("Current version: %s, Available version: %s\n", FIRMWARE_VERSION, latestTag.c_str());
   
@@ -109,4 +108,4 @@ String getLatestReleaseTag(const char* repoOwner, const char* repoName) {
     } else {
       Serial.println("Unable to check for updates... empty release tag.");
     }
-  }
+}

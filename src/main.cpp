@@ -24,6 +24,11 @@ unsigned long lastSendTime = 0;
 void setup() {
   Serial.begin(115200);
   wifiManager.autoConnect("ESP32-AP"); 
+  
+  //
+  Serial.print("Dirección IP asignada: ");
+  Serial.println(WiFi.localIP());  
+  //
 
   Serial.println("Conectado a WiFi");
   configTime(0, 0, "pool.ntp.org", "time.nist.gov");

@@ -36,7 +36,6 @@ void sendDataGrafana(float temperature, float humidity, float co2) {
         localHttp.addHeader("Authorization", "Basic " + String(TOKEN_GRAFANA));
         String data = createGrafanaMessage(temperature, humidity, co2);
 
-        Serial.println("[sendDataGrafana] POST a Grafana..."); // sacar
         int httpResponseCode = localHttp.POST(data);
 
         if (httpResponseCode == 204) {

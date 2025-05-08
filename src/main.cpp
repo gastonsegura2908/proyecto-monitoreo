@@ -26,8 +26,10 @@ void setup() {
   Serial.begin(115200);
   wifiManager.autoConnect("ESP32-AP"); 
   
-  Serial.print("Dirección IP asignada: "); // sacar
-  Serial.println(WiFi.localIP());  // sacar
+  #if defined(MODO_SIMULACION)
+    Serial.print("Dirección IP asignada: "); 
+    Serial.println(WiFi.localIP());  
+  #endif
 
   Serial.println("Conectado a WiFi");
   configTime(0, 0, "pool.ntp.org", "time.nist.gov");
@@ -61,9 +63,7 @@ void loop() {
   // 1. Verificamos si hay que chequear actualizaciones
   if (currentMillis - lastUpdateCheck >= UPDATE_INTERVAL) {
     Serial.printf("Free heap before checking: %d bytes\n", ESP.getFreeHeap());
-    Serial.println("[checkForUpdates] Iniciando..."); //////////// sacar
     checkForUpdates();
-    Serial.println("[checkForUpdates] Finalizado."); //////////// sacar
     Serial.printf("Free heap after checking: %d bytes\n", ESP.getFreeHeap());
     lastUpdateCheck = currentMillis;
   }
@@ -96,9 +96,7 @@ void loop() {
     #endif
 
     Serial.printf("Free heap before sending: %d bytes\n", ESP.getFreeHeap());
-    Serial.println("[sendDataGrafana] Iniciando..."); ///////// sacar
     sendDataGrafana(temperature, humidity, co2);
-    Serial.println("[sendDataGrafana] Finalizado."); ////////// sacar
     Serial.printf("Free heap after sending: %d bytes\n", ESP.getFreeHeap());
   }
 }

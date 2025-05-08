@@ -18,8 +18,6 @@
 void createConfigFile() {
     const char* path = "/config.json";
 
-    SPIFFS.remove(path);// sacar
-
     if (SPIFFS.exists(path)) {
       Serial.println("Archivo de configuración ya existe.");
       return;

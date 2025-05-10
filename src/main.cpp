@@ -11,7 +11,8 @@
 #include "version.h"
 #include <SPIFFS.h>
 #include <ArduinoJson.h>
-#include "grafanaManager.h"
+#include "sendDataGrafana.h"
+#include "createGrafanaMessage.h"
 #include "constants.h"
 #include "globals.h"
 #include "endpoints.h"
@@ -49,8 +50,8 @@ void setup() {
 
   clientSecure.setInsecure(); 
 
-  server.on("/mediciones", HTTP_GET, handleMediciones);
-  server.on("/configuracion", HTTP_GET, handleConfiguracion);
+  server.on("/actual", HTTP_GET, handleMediciones);
+  server.on("/config", HTTP_GET, handleConfiguracion);
 
   server.begin();
   Serial.println("Servidor web iniciado en el puerto 80");
@@ -75,12 +76,18 @@ void loop() {
     lastSendTime = currentMillis;
 
     float temperature = 99, humidity = 100, co2 = 999999;
+    String wifiStatus = "unknown";
+    String rotation = "none";
+    String errors = "none"; 
 
     #if defined(MODO_SIMULACION)
       // Datos simulados
       temperature = 22.5 + random(-100, 100) * 0.01;
       humidity = 50 + random(-500, 500) * 0.01;
       co2 = 400 + random(0, 200);
+      wifiStatus = "connected";
+      rotation = "none";
+      errors = "none";      
       Serial.println("Enviando datos simulados...");
     #else
       if (sensorActivo && scd30.dataReady()) {
@@ -91,14 +98,17 @@ void loop() {
         temperature = scd30.temperature;
         humidity = scd30.relative_humidity;
         co2 = scd30.CO2;
+        wifiStatus = (WiFi.status() == WL_CONNECTED) ? "connected" : "disconnected";
+        errors = "none";
+        rotation = "normal";
       } else {
         Serial.println("Sensor no listo, esperando...");
-        return;
+        //return;
       }
     #endif
 
     Serial.printf("Free heap before sending: %d bytes\n", ESP.getFreeHeap());
-    sendDataGrafana(temperature, humidity, co2);
+    sendDataGrafana(temperature, humidity, co2, wifiStatus, rotation, errors);
     Serial.printf("Free heap after sending: %d bytes\n", ESP.getFreeHeap());
   }
 }

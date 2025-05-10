@@ -13,20 +13,10 @@
 #include <ArduinoJson.h>
 #include "constants.h"
 #include "globals.h"
-#include "grafanaManager.h"
+#include "sendDataGrafana.h"
+#include "createGrafanaMessage.h"
 
-String createGrafanaMessage(float temperature, float humidity, float co2) {
-    unsigned long long timestamp = time(nullptr) * 1000000000ULL;
-    String message = "medicionesCO2,device=" + String(INICIALES) + 
-                     " temp=" + String(temperature, 2) +
-                     ",hum=" + String(humidity, 2) + 
-                     ",co2=" + String(co2) + 
-                     " " + String(timestamp);
-  
-    return message;
-  }
-  
-void sendDataGrafana(float temperature, float humidity, float co2) {
+void sendDataGrafana(float temperature, float humidity, float co2, const String& wifiStatus, const String& rotation, const String& errors) {
     if (WiFi.status() == WL_CONNECTED) {
         HTTPClient localHttp;  
 
@@ -34,7 +24,7 @@ void sendDataGrafana(float temperature, float humidity, float co2) {
         localHttp.setTimeout(5000); // Timeout de 5 segundos
         localHttp.addHeader("Content-Type", "text/plain");
         localHttp.addHeader("Authorization", "Basic " + String(TOKEN_GRAFANA));
-        String data = createGrafanaMessage(temperature, humidity, co2);
+        String data = createGrafanaMessage(temperature, humidity, co2, wifiStatus, rotation, errors);
 
         int httpResponseCode = localHttp.POST(data);
 

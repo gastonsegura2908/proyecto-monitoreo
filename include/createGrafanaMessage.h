@@ -1,8 +1,9 @@
 #ifndef CREATE_GRAFANA_MESSAGE_H
 #define CREATE_GRAFANA_MESSAGE_H
 
-#include <Arduino.h>
+//#include <Arduino.h>
+#include <string>
 
-String createGrafanaMessage(float temperature, float humidity, float co2, const String& wifiStatus, const String& rotation, const String& errors);
+std::string createGrafanaMessage(float temperature, float humidity, float co2);
 
 #endif // CREATE_GRAFANA_MESSAGE_H

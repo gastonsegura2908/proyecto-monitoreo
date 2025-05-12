@@ -3,6 +3,6 @@
 
 #include <Arduino.h>
 
-void sendDataGrafana(float temperature, float humidity, float co2, const String& wifiStatus, const String& rotation, const String& errors);
+void sendDataGrafana(float temperature, float humidity, float co2);
 
 #endif // SEND_DATA_GRAFANA_H

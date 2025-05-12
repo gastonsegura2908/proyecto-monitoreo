@@ -1,16 +1,7 @@
 #include <Arduino.h>
 #include <WebServer.h>
 #include <WiFi.h>
-#include <HTTPClient.h>
 #include <Adafruit_SCD30.h>
-#include <time.h>
-#include <WiFiManager.h> 
-#include <HTTPUpdate.h>  
-#include <WiFiClientSecure.h>  
-#include <esp_ota_ops.h>
-#include "version.h"
-#include <SPIFFS.h>
-#include <ArduinoJson.h>
 #include "globals.h"
 
 WebServer server(80);

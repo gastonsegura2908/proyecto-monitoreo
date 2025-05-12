@@ -15,14 +15,15 @@ void sendDataGrafana(float temperature, float humidity, float co2) {
         localHttp.setTimeout(5000); // Timeout de 5 segundos
         localHttp.addHeader("Content-Type", "text/plain");
         localHttp.addHeader("Authorization", "Basic " + String(TOKEN_GRAFANA));
-        char message[64];
-        createGrafanaMessage(message, sizeof(message), temperature, humidity, co2);
+
+        char message[128];
+        unsigned long long timestamp = (unsigned long long)time(nullptr) * 1000000000ULL;
+        createGrafanaMessage(message, sizeof(message), INICIALES, temperature, humidity, co2, timestamp);
         String data = String(message);
 
-        //String data = String(createGrafanaMessage(temperature, humidity, co2).c_str());
-
-
+        Serial.println("pre POST send data grafana"); // SACAR
         int httpResponseCode = localHttp.POST(data);
+        Serial.println("pos POST send data grafana"); // SACAR
 
         if (httpResponseCode == 204) {
             Serial.println("Datos enviados correctamente");

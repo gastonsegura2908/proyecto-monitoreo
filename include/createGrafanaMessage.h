@@ -4,6 +4,6 @@
 //#include <Arduino.h>
 #include <string>
 
-std::string createGrafanaMessage(float temperature, float humidity, float co2);
+void createGrafanaMessage(char* buffer, size_t bufferSize, float temperature, float humidity, float co2);
 
 #endif // CREATE_GRAFANA_MESSAGE_H

@@ -9,10 +9,9 @@ void testSendDataGrafana() {
 }
 
 void testCreateGrafanaMessage() {
-    std::string result = createGrafanaMessage(23.45, 55.67, 789.0);
+    char buffer[64];
+    createGrafanaMessage(buffer, sizeof(buffer), 23.45f, 55.67f, 789.0f);
 
-    std::string expected = "temp=23.45,hum=55.67,co2=789.00";
-
-    TEST_ASSERT_EQUAL_STRING(expected.c_str(), result.c_str()); 
-
+    const char* expected = "temp=23.45,hum=55.67,co2=789.00";
+    TEST_ASSERT_EQUAL_STRING(expected, buffer);
 }

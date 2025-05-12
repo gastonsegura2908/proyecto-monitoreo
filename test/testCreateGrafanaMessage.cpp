@@ -1,3 +1,4 @@
+#include "createGrafanaMessage.h"
 #include <cstdio>
 
 void createGrafanaMessage(char* buffer, size_t bufferSize, float temperature, float humidity, float co2) {

@@ -15,7 +15,11 @@ void sendDataGrafana(float temperature, float humidity, float co2) {
         localHttp.setTimeout(5000); // Timeout de 5 segundos
         localHttp.addHeader("Content-Type", "text/plain");
         localHttp.addHeader("Authorization", "Basic " + String(TOKEN_GRAFANA));
-        String data = String(createGrafanaMessage(temperature, humidity, co2).c_str());
+        char message[64];
+        createGrafanaMessage(message, sizeof(message), temperature, humidity, co2);
+        String data = String(message);
+
+        //String data = String(createGrafanaMessage(temperature, humidity, co2).c_str());
 
 
         int httpResponseCode = localHttp.POST(data);

@@ -21,9 +21,7 @@ void sendDataGrafana(float temperature, float humidity, float co2) {
         createGrafanaMessage(message, sizeof(message), INICIALES, temperature, humidity, co2, timestamp);
         String data = String(message);
 
-        Serial.println("pre POST send data grafana"); // SACAR
         int httpResponseCode = localHttp.POST(data);
-        Serial.println("pos POST send data grafana"); // SACAR
 
         if (httpResponseCode == 204) {
             Serial.println("Datos enviados correctamente");

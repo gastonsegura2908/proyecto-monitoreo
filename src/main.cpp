@@ -27,6 +27,8 @@ bool sensorActivo = false;
 
 void setup() {
   Serial.begin(115200);
+  
+  wifiManager.setConnectTimeout(30); // segundos
   wifiManager.autoConnect("ESP32-AP"); 
   
   #if defined(MODO_SIMULACION)

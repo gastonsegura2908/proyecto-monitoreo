@@ -9,13 +9,13 @@
 void createConfigFile() {
     const char* path = "/config.json";
     
+    //SPIFFS.remove(path);
+
     if (SPIFFS.exists(path)) {
       Serial.println("Archivo de configuración ya existe.");
       return;
     }
   
-    SPIFFS.remove(path); // comentar esto
-
     Serial.println("Creando archivo de configuración...");
   
     File file = SPIFFS.open(path, FILE_WRITE);
@@ -26,9 +26,9 @@ void createConfigFile() {
   
     JsonDocument config;
     config["max_temperature"] = 37.7;
-    config["min_temperature"] = 37.5;
+    config["min_temperature"] = 37.3;
     config["rotation_duration"] = 50000;
-    config["rotation_duration"] = 50000;
+    config["rotation_period"] = 3600000;
     config["ssid"] = "ToChange";
     config["passwd"] = "ToChange";
     config["tray_one_date"] = 0;
@@ -43,7 +43,7 @@ void createConfigFile() {
     config["hash"] = mac;
     config["incubator_name"] = "moni-" + mac; // en algun momento se debe a cambiar por el nombre del incubador por moni
   
-    if (serializeJson(config, file) == 0) {
+    if (serializeJsonPretty(config, file) == 0) {
       Serial.println("Error al escribir JSON en archivo.");
     } else {
       Serial.println("Archivo config.json creado correctamente.");

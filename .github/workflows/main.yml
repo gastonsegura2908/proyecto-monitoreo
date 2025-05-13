@@ -1,9 +1,10 @@
 name: Build Firmware (PlatformIO)
 
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
-    types: [closed]
 
 permissions:
   contents: write
@@ -28,7 +29,8 @@ jobs:
     - name: Build Firmware
       run: |
         mkdir -p binarios
-        pio run -e esp32dev --target buildfs
+        pio run -e esp32dev            # Compila todo, incluyendo firmware.bin
+        pio run -e esp32dev --target buildfs   # También el SPIFFS
         cp .pio/build/esp32dev/firmware.bin binarios/
         cp .pio/build/esp32dev/spiffs.bin binarios/ || echo "No se generó spiffs.bin"
 

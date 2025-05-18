@@ -1,3 +1,4 @@
+// masomenos igual
 #include "createGrafanaMessage.h"
 #include <cstdio>
 

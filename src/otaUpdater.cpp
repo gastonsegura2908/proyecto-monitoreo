@@ -9,7 +9,7 @@
 #include "constants.h"
 
 String getLatestReleaseTag(const char* repoOwner, const char* repoName) {
-    HTTPClient http;
+    HTTPClient http; // diferente (no esta)
     String apiUrl = "https://api.github.com/repos/" + String(repoOwner) + "/" + String(repoName) + "/releases/latest";
     Serial.println("API URL: " + apiUrl);
   

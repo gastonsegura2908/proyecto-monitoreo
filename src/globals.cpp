@@ -9,3 +9,4 @@ Adafruit_SCD30 scd30;
 WiFiManager wifiManager;
 WiFiClientSecure clientSecure;
 WiFiClient client;
+// HTTPClient http; // diferente (falta)

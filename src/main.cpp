@@ -28,24 +28,24 @@ bool sensorActivo = false;
 void setup() {
   Serial.begin(115200);
   
-  wifiManager.setConnectTimeout(30); // ver esto // diferente (no esta)
+  wifiManager.setConnectTimeout(30); 
   wifiManager.autoConnect("ESP32-AP"); 
   
   #if defined(MODO_SIMULACION)
-    Serial.print("Dirección IP asignada: ");  // diferente(no esta)
-    Serial.println(WiFi.localIP());   // diferente (no esta)
+    Serial.print("Dirección IP asignada: ");  
+    Serial.println(WiFi.localIP());   
   #endif
 
   Serial.println("Conectado a WiFi");
   configTime(0, 0, "pool.ntp.org", "time.nist.gov");
 
-  if (!SPIFFS.begin(true)) { // diferente (no esta)
+  if (!SPIFFS.begin(true)) { 
     Serial.println("Error montando SPIFFS");
   }
 
-  createConfigFile(); // diferente (no esta)
+  createConfigFile(); 
 
-  sensorActivo = scd30.begin(); // diferente pero no tanto
+  sensorActivo = scd30.begin(); 
   if (!sensorActivo) {  
     Serial.println("No se pudo inicializar el sensor SCD30!");
   }
@@ -86,7 +86,7 @@ void loop() {
       co2 = 400 + random(0, 200);      
       Serial.println("Enviando datos simulados...");
     #else
-      if (sensorActivo && scd30.dataReady()) { // diferente pero no tanto
+      if (sensorActivo && scd30.dataReady()) { 
         if (!scd30.read()) {
           Serial.println("Error leyendo el sensor!");
           return;
@@ -95,7 +95,7 @@ void loop() {
         humidity = scd30.relative_humidity;
         co2 = scd30.CO2;
       } else {
-        Serial.println("Sensor no listo, esperando..."); //diferente(no esta)
+        Serial.println("Sensor no listo, esperando..."); 
       }
     #endif
 

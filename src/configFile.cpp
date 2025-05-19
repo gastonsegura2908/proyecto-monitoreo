@@ -1,4 +1,3 @@
-// esta funcion ni siquiera existe en el otro
 #include <Arduino.h>
 #include <WiFi.h>
 #include <SPIFFS.h>

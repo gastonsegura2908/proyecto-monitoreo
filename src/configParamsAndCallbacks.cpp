@@ -2,10 +2,15 @@
 #include "globals.h"
 #include "setCallbacks.h"
 
+//WiFiManagerParameter custom_mqtt_server("server", "mqtt server", "", 40);
+//WiFiManagerParameter custom_mqtt_port("port", "mqtt port", "", 6);
+
 void configParamsAndCallbacks(){
   static WiFiManagerParameter custom_html("<p style=\"color:pink;font-weight:Bold;\">This Is Custom HTML</p>"); // only custom html
-  static WiFiManagerParameter custom_mqtt_server("server", "mqtt server", "", 40);
-  static WiFiManagerParameter custom_mqtt_port("port", "mqtt port", "", 6);
+  //wifiManager.addParameter(&custom_mqtt_server);
+  //wifiManager.addParameter(&custom_mqtt_port);
+  //static WiFiManagerParameter custom_mqtt_server("server", "mqtt server", "", 40);
+  //static WiFiManagerParameter custom_mqtt_port("port", "mqtt port", "", 6);
   static WiFiManagerParameter custom_token("api_token", "api token", "", 16);
   static WiFiManagerParameter custom_tokenb("invalid token", "invalid token", "", 0); // id is invalid, cannot contain spaces
   static WiFiManagerParameter custom_ipaddress("input_ip", "input IP", "", 15,"pattern='\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}'"); // custom input attrs (ip mask)
@@ -56,12 +61,13 @@ void configParamsAndCallbacks(){
   //custom_token.setValue("test",4); // le pone un valor llamado "test" a ese campo
 
   // set custom html menu content , inside menu item "custom", see setMenu()
-  const char* menuhtml = "<form action='/custom' method='get'><button>Custom</button></form><br/>\n"; 
-  wifiManager.setCustomMenuHTML(menuhtml); 
+  //const char* menuhtml = "<form action='/custom' method='get'><button>Custom</button></form><br/>\n"; 
+  //wifiManager.setCustomMenuHTML(menuhtml); 
 
   wifiManager.setDarkMode(true);
   
-  std::vector<const char *> menu = {"wifi","wifinoscan","info","param","custom","close","sep","erase","update","restart","exit"};
+  //std::vector<const char *> menu = {"wifi","wifinoscan","info","param","custom","close","sep","erase","update","restart","exit"};
+  std::vector<const char *> menu = {"wifi","wifinoscan","info","param","close","sep","erase","update","restart","exit"};
 
   wifiManager.setMenu(menu);
 

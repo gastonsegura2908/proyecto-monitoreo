@@ -8,3 +8,5 @@ const char* YOUR_REPO_NAME = "proyecto-monitoreo";
 const char* SSID = "ESP32-SENSOR";
 const char* PASSWORD = "12345678";
 const unsigned long UPDATE_INTERVAL = 3600000;  // 1 hora
+
+

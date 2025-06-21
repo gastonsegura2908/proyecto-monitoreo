@@ -1,6 +1,5 @@
 #include "setCallbacks.h"
 #include "globals.h"
-#include "handles.h"
 #include "endpoints.h"
 
 //gets called when WiFiManager enters configuration mode

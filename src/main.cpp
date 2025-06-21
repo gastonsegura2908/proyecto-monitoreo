@@ -101,48 +101,14 @@ void loop() {
 
     if (mqttServer && strlen(mqttServer) > 0 && mqttPortStr && strlen(mqttPortStr) > 0)
     {
-      //Serial.printf("Hay algooo\n");
       uint16_t mqttPort = atoi(mqttPortStr);
       mqtt.setServer(mqttServer, mqttPort);
       Serial.printf("Conectando a MQTT en %s:%s\n", mqttServer, mqttPortStr);
       mqttConfigured = true;
-      //if (mqtt.connect(deviceName)) {
-      //  Serial.println("Conectado a MQTT exitosamente.");
-      //  mqttConfigured = true;
-      //} else {
-      //  Serial.printf("Falló la conexión MQTT. Estado: %d\n", mqtt.state());
-      //}      
     } 
-    //else {
-    //  Serial.println("Configuración de MQTT no válida, no se conectará.");
-    //}
   }
 
   mqtt.loop();
-
-  //if (!enModoLocal && mqtt.connected()) {
-  //  #if defined(MODO_SIMULACION)
-  //    // Datos simulados
-  //    temperature = 22.5 + random(-100, 100) * 0.01;
-  //    humidity = 50 + random(-500, 500) * 0.01;
-  //    co2 = 400 + random(0, 200);      
-  //    Serial.println("Enviando datos simulados...");
-  //  #else
-  //    if (sensorActivo && scd30.dataReady()) { 
-  //      if (!scd30.read()) {
-  //        Serial.println("Error leyendo el sensor!");
-  //        return;
-  //      }
-  //      temperature = scd30.temperature;
-  //      humidity = scd30.relative_humidity;
-  //      co2 = scd30.CO2;
-  //    } else {
-  //      Serial.println("Sensor no listo, esperando..."); 
-  //    }
-  //  #endif    
-  //  mqtt.publish("tu/dispositivo/temperatura", String(temperature, 1).c_str());
-  //  mqtt.publish("tu/dispositivo/co2", String(co2, 0).c_str());
-  //}
 
   wifiManager.process();
   
@@ -201,7 +167,6 @@ void loop() {
         Serial.println("Enviando datos con mqtt"); 
         mqtt.publish("tu/dispositivo/temperatura", String(temperature, 1).c_str());
         mqtt.publish("tu/dispositivo/co2", String(co2, 0).c_str());    
-        //mqttConfigured = true;
       }else{
         Serial.printf("Falló la conexión MQTT. Estado: %d\n", mqtt.state());
         mqttConfigured = false;
